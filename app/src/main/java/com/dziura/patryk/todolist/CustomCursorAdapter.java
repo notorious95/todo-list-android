@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -69,13 +70,13 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<CustomCursorAdapte
             holder.priorityImage.setVisibility(View.VISIBLE);
         }
         else {
-            holder.priorityImage.setVisibility(View.INVISIBLE);
+            holder.priorityImage.setVisibility(View.GONE);
         }
 
         if (notification.equals("ON"))
             holder.notificationImage.setVisibility(View.VISIBLE);
         else
-            holder.notificationImage.setVisibility(View.INVISIBLE);
+            holder.notificationImage.setVisibility(View.GONE);
 
         holder.dateView.setText(formattedDate);
     }

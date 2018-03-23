@@ -3,6 +3,7 @@
     <string name="app_name">To-Do List</string>
     <string name="add_task_name">New Task</string>
     <string name="change_task_name">Modify task</string>
+    <string name="settings_name">Settings</string>
 
     <!--others -->
     <string name="menu_item_done">Done</string>

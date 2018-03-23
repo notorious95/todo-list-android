@@ -47,6 +47,7 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
     private TextView mPrioritySummary;
     private FloatingActionButton mRemoveActionButton;
 
+
     /**
      * Variables that define current datetime
      */
@@ -101,13 +102,13 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
         });
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this, R.style.DialogTheme,this, mCurrentYear, mCurrentMonth, mCurrentDay);
+                this, this, mCurrentYear, mCurrentMonth, mCurrentDay);
         mDateImage.setOnClickListener(v -> {
             datePickerDialog.show();
         });
 
         TimePickerDialog timePickerDialog = new TimePickerDialog(
-                this, R.style.DialogTheme, this, mCurrentHour, 0, true);
+                this, this, mCurrentHour, 0, true);
         mTimeImage.setOnClickListener(v -> {
             timePickerDialog.show();
         });
