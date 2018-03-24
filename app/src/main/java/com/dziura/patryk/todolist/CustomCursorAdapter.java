@@ -23,19 +23,26 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<CustomCursorAdapte
 
     private Cursor mCursor;
     private Context mContext;
+    private String mSelectedTheme;
 
     public interface ListClickListener {
         void onListItemClick(int clickedItemIndex);
     }
 
-    public CustomCursorAdapter(ListClickListener listener, Context context) {
+    public CustomCursorAdapter(ListClickListener listener, Context context, String theme) {
         mOnClickListener = listener;
         mContext = context;
+        mSelectedTheme = theme;
     }
 
     @Override
     public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        int layoutIdForList = R.layout.todo_list_task_2;
+        int layoutIdForList = 0;
+        if (mSelectedTheme.equals("green"))
+            layoutIdForList = R.layout.todo_list_task;
+        else
+            layoutIdForList = R.layout.todo_list_task_2;
+
         LayoutInflater layoutInflater = LayoutInflater.from(mContext);
 
         View view = layoutInflater.inflate(layoutIdForList, parent, false);

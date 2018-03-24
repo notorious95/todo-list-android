@@ -44,8 +44,9 @@ public class HistoryTaskFragment extends Fragment implements CustomCursorAdapter
     private ContentResolver mResolver = null;
     private Context mainActivityContext;
     private Date mDateToday;
+    private String mSelectedTheme;
 
-    public HistoryTaskFragment() {}
+    public HistoryTaskFragment(){}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,15 @@ public class HistoryTaskFragment extends Fragment implements CustomCursorAdapter
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tab_history_2, container, false);
+        View rootView = null;
+        Bundle bundle = this.getArguments();
+        if (bundle != null)
+            mSelectedTheme = bundle.getString("theme");
+        if (mSelectedTheme.equals("blue"))
+            rootView = inflater.inflate(R.layout.fragment_tab_history_2, container, false);
+        else if (mSelectedTheme.equals("green"))
+            rootView = inflater.inflate(R.layout.fragment_tab_history, container, false);
+
         mFloatingButton = rootView.findViewById(R.id.floating_button);
         mRecyclerView = rootView.findViewById(R.id.todo_list);
         mainActivityContext = getActivity().getApplicationContext();
@@ -74,7 +83,7 @@ public class HistoryTaskFragment extends Fragment implements CustomCursorAdapter
         LinearLayoutManager layoutManager = new LinearLayoutManager(mainActivityContext);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.hasFixedSize();
-        mAdapter = new CustomCursorAdapter(this, mainActivityContext);
+        mAdapter = new CustomCursorAdapter(this, mainActivityContext, mSelectedTheme);
         mRecyclerView.setAdapter(mAdapter);
 
         mFloatingButton.setOnClickListener(view -> {
@@ -101,6 +110,7 @@ public class HistoryTaskFragment extends Fragment implements CustomCursorAdapter
         Intent startTaskActivity = new Intent(mainActivityContext, TaskActivity.class);
         startTaskActivity.setAction("modify");
         startTaskActivity.putExtra("id", stringId);
+        startTaskActivity.putExtra("theme", mSelectedTheme);
         startActivity(startTaskActivity);
     }
 

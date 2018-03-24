@@ -39,6 +39,7 @@ public class NextDaysTasksFragment extends Fragment implements CustomCursorAdapt
     private static final int TASK_LOADER_ID = 2;
     private ContentResolver mResolver = null;
     private Context mainActivityContext;
+    private String mSelectedTheme;
 
     public NextDaysTasksFragment() {}
 
@@ -50,7 +51,15 @@ public class NextDaysTasksFragment extends Fragment implements CustomCursorAdapt
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tab_2, container, false);
+        View rootView = null;
+        Bundle bundle = this.getArguments();
+        if (bundle != null)
+            mSelectedTheme = bundle.getString("theme");
+        if (mSelectedTheme.equals("blue"))
+            rootView = inflater.inflate(R.layout.fragment_tab_2, container, false);
+        else if (mSelectedTheme.equals("green"))
+            rootView = inflater.inflate(R.layout.fragment_tab, container, false);
+
         mFloatingButton = rootView.findViewById(R.id.floating_button);
         mRecyclerView = rootView.findViewById(R.id.todo_list);
         mainActivityContext = getActivity().getApplicationContext();
@@ -68,13 +77,14 @@ public class NextDaysTasksFragment extends Fragment implements CustomCursorAdapt
         LinearLayoutManager layoutManager = new LinearLayoutManager(mainActivityContext);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.hasFixedSize();
-        mAdapter = new CustomCursorAdapter(this, mainActivityContext);
+        mAdapter = new CustomCursorAdapter(this, mainActivityContext, mSelectedTheme);
         mRecyclerView.setAdapter(mAdapter);
 
 
         mFloatingButton.setOnClickListener(view -> {
             Intent addNewTaskIntent = new Intent(mainActivityContext, TaskActivity.class);
             addNewTaskIntent.setAction("add");
+            addNewTaskIntent.putExtra("theme", mSelectedTheme);
             startActivity(addNewTaskIntent);
         });
 
@@ -92,6 +102,7 @@ public class NextDaysTasksFragment extends Fragment implements CustomCursorAdapt
         Intent startTaskActivity = new Intent(mainActivityContext, TaskActivity.class);
         startTaskActivity.setAction("modify");
         startTaskActivity.putExtra("id", stringId);
+        startTaskActivity.putExtra("theme", mSelectedTheme);
         startActivity(startTaskActivity);
     }
 

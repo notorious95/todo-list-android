@@ -1,8 +1,10 @@
 package com.dziura.patryk.todolist;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 
 import android.support.v4.app.Fragment;
@@ -17,16 +19,21 @@ import com.dziura.patryk.todolist.tabs.HistoryTaskFragment;
 import com.dziura.patryk.todolist.tabs.NextDaysTasksFragment;
 import com.dziura.patryk.todolist.tabs.TodayTasksFragment;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
+    private String mSelectedTheme = "blue";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_2);
+        setupSharedPreferences();
+        if (mSelectedTheme.equals("green"))
+            setContentView(R.layout.activity_main);
+        else
+            setContentView(R.layout.activity_main_2);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -43,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
     }
+
 
 
     @Override
@@ -69,6 +77,22 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_theme_key))) {
+            mSelectedTheme = sharedPreferences.getString(key,
+                    getString(R.string.pref_theme_value_blue));
+        }
+    }
+
+    private void setupSharedPreferences(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mSelectedTheme = sharedPreferences.getString(getString(R.string.pref_theme_key),
+                getString(R.string.pref_theme_value_blue));
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+    }
+
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
@@ -81,14 +105,23 @@ public class MainActivity extends AppCompatActivity {
             switch (position){
                 case 0:
                     TodayTasksFragment tab1 = new TodayTasksFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("theme", mSelectedTheme);
+                    tab1.setArguments(bundle);
                     return tab1;
 
                 case 1:
                     NextDaysTasksFragment tab2 = new NextDaysTasksFragment();
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("theme", mSelectedTheme);
+                    tab2.setArguments(bundle1);
                     return tab2;
 
                 case 2:
                     HistoryTaskFragment tab3 = new HistoryTaskFragment();
+                    Bundle bundle2 = new Bundle();
+                    bundle2.putString("theme", mSelectedTheme);
+                    tab3.setArguments(bundle2);
                     return tab3;
 
                 default:
@@ -101,5 +134,11 @@ public class MainActivity extends AppCompatActivity {
             // Show 3 total pages.
             return 3;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 }

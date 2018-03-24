@@ -26,19 +26,20 @@
                 android:value=".MainActivity" />
         </activity>
 
+        <activity android:name=".SettingsActivity"
+            android:label="@string/settings_name"
+            android:theme="@style/AppTheme2"
+            android:parentActivityName=".SettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SettingsActivity" />
+        </activity>
+
         <provider
             android:name=".data.TaskContentProvider"
             android:authorities="com.dziura.patryk.todolist"
             android:exported="false" />
 
-        <activity android:name=".SettingsActivity"
-            android:theme="@style/AppTheme2"
-            android:label="@string/settings_name"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
     </application>
 
 </manifest>

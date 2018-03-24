@@ -61,11 +61,22 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
     private String mPriority = "N";
     private String mNotification = "OFF";
     private String updatingTaskId = null;
+    private String mSelectedTheme;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_task_2);
+
+        Intent intent = getIntent();
+        mSelectedTheme = intent.getStringExtra("theme");
+        if (mSelectedTheme.equals("blue")) {
+            setTheme(R.style.AppTheme2);
+            setContentView(R.layout.activity_task_2);
+        } else {
+            setTheme(R.style.AppTheme);
+            setContentView(R.layout.activity_task);
+        }
+
         mDescriptionEditText = findViewById(R.id.descriptionEditText);
         mDateTextView = findViewById(R.id.dateTextView);
         mDateImage = findViewById(R.id.dateImage);
@@ -114,7 +125,7 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
         });
 
 
-        Intent intent = getIntent();
+        //Intent intent = getIntent();
         if (intent.getAction().equals("modify")){
 
             getSupportActionBar().setTitle("Modify Task");
