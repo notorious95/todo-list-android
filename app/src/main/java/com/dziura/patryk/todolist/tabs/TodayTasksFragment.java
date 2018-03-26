@@ -69,13 +69,11 @@ public class TodayTasksFragment extends Fragment implements CustomCursorAdapter.
 
         LoaderManager loaderManager = getActivity().getSupportLoaderManager();
         Loader<Cursor> cursorLoader = loaderManager.getLoader(TASK_LOADER_ID);
-
         if (cursorLoader == null) {
             loaderManager.initLoader(TASK_LOADER_ID, null, this);
         } else {
             loaderManager.restartLoader(TASK_LOADER_ID, null, this);
         }
-
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(mainActivityContext);
         mRecyclerView.setLayoutManager(layoutManager);

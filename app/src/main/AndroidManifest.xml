@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dziura.patryk.todolist">
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -39,6 +41,12 @@
             android:name=".data.TaskContentProvider"
             android:authorities="com.dziura.patryk.todolist"
             android:exported="false" />
+
+        <receiver
+            android:name=".utilities.NotificationReceiver"
+            android:enabled="true"
+            android:exported="false" >
+        </receiver>
 
     </application>
 

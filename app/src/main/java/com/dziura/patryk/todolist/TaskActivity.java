@@ -1,13 +1,26 @@
 package com.dziura.patryk.todolist;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -23,12 +36,15 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.dziura.patryk.todolist.data.TaskContract;
+import com.dziura.patryk.todolist.utilities.NotificationReceiver;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TaskActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener,
         TimePickerDialog.OnTimeSetListener{
@@ -61,7 +77,11 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
     private String mPriority = "N";
     private String mNotification = "OFF";
     private String updatingTaskId = null;
-    private String mSelectedTheme;
+    private static String mSelectedTheme;
+
+    private Set<Integer> activatedNotificationSet;
+
+    private static final String TASK_NOTIFICATION_CHANNEL_ID = "task_channel";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +96,8 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
             setTheme(R.style.AppTheme);
             setContentView(R.layout.activity_task);
         }
+
+        activatedNotificationSet = new HashSet<>();
 
         mDescriptionEditText = findViewById(R.id.descriptionEditText);
         mDateTextView = findViewById(R.id.dateTextView);
@@ -125,7 +147,6 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
         });
 
 
-        //Intent intent = getIntent();
         if (intent.getAction().equals("modify")){
 
             getSupportActionBar().setTitle("Modify Task");
@@ -137,6 +158,7 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
                 uri = uri.buildUpon().appendPath(updatingTaskId).build();
                 int result = getContentResolver().delete(uri, "_id=?", new String[]{updatingTaskId});
                 if (result > 0){
+                    cancelNotificationAlarm(this, Integer.parseInt(updatingTaskId));
                     Toast.makeText(this, "Task has been deleted.", Toast.LENGTH_SHORT).show();
                     finish();
                 }
@@ -243,6 +265,7 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int menuItemThatWasSelected = item.getItemId();
+        int notificationId = 0;
         if (menuItemThatWasSelected == R.id.menu_item_done) {
             if (TextUtils.isEmpty(mDescriptionEditText.getText().toString()))
                 Toast.makeText(getBaseContext(), "You must add some description.", Toast.LENGTH_LONG).show();
@@ -254,13 +277,28 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
                 contentValues.put(TaskContract.Tasks.COLUMN_NOTIFICATION, mNotification);
                 if (updatingTaskId == null) {
                     Uri uri = getContentResolver().insert(TaskContract.Tasks.CONTENT_URI, contentValues);
-                    if (uri != null)
+                    if (uri != null) {
                         Toast.makeText(getBaseContext(), "Your task has been added.", Toast.LENGTH_SHORT).show();
+                        notificationId = Integer.parseInt(uri.getLastPathSegment().toString());
+                        if (mNotification.equals("ON")) {
+                            activatedNotificationSet.add(notificationId);
+                            scheduleNotification(this, notificationId, mDescriptionEditText.getText().toString());
+                        }
+                    }
                 } else{
                     int result = getContentResolver().update(TaskContract.Tasks.CONTENT_URI, contentValues, "_id=?", new String[]{updatingTaskId});
-                    if (result > 0)
+                    if (result > 0) {
                         Toast.makeText(getBaseContext(), "Your task has been updated.", Toast.LENGTH_SHORT).show();
+                        notificationId = Integer.parseInt(updatingTaskId);
+                        if (mNotification.equals("ON")) {
+                            activatedNotificationSet.add(notificationId);
+                            scheduleNotification(this, notificationId, mDescriptionEditText.getText().toString());
+                        } else
+                            cancelNotificationAlarm(this, notificationId);
+                    }
                 }
+                if (mNotification.equals("OFF"))
+                    activatedNotificationSet.remove(notificationId);
                 finish();
             }
         }
@@ -309,5 +347,97 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
         else
             mTimeTextView.setText("" + hourOfDay + ":" + minute);
 
+    }
+
+    public void scheduleNotification(Context context, int notificationId, String description) {
+
+        NotificationManager notificationManager = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel mChannel = new NotificationChannel(
+                    TASK_NOTIFICATION_CHANNEL_ID,
+                    "task notificaion channel",
+                    NotificationManager.IMPORTANCE_HIGH);
+            notificationManager.createNotificationChannel(mChannel);
+        }
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, TASK_NOTIFICATION_CHANNEL_ID)
+                .setColor(ContextCompat.getColor(context, R.color.colorAccent2))
+                .setSmallIcon(R.drawable.notification)
+                .setLargeIcon(largeIcon(context))
+                .setContentTitle("Task reminder")
+                .setContentText(description)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText((description)))
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setContentIntent(contentIntent(context, notificationId))
+                .addAction(showTaskList(context, notificationId))
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setAutoCancel(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
+                && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
+        }
+
+        Notification notification = notificationBuilder.build();
+
+        Intent notificationIntent = new Intent(context, NotificationReceiver.class);
+        notificationIntent.setAction("" + notificationId);
+        notificationIntent.putExtra(NotificationReceiver.NOTIFICATION_ID, notificationId);
+        notificationIntent.putExtra(NotificationReceiver.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, notificationId, notificationIntent, PendingIntent.FLAG_ONE_SHOT);
+
+        SimpleDateFormat dateAndTime = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        Date date = null;
+        try {
+            date = dateAndTime.parse(mDateTextView.getText().toString() + " " + mTimeTextView.getText().toString());
+        }catch (ParseException e){
+            e.printStackTrace();
+        }
+
+        long setDateTime = date.getTime();
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, setDateTime, pendingIntent);
+    }
+
+    private static PendingIntent contentIntent(Context context, int id) {
+        Intent startActivityIntent = new Intent(context, MainActivity.class);
+        startActivityIntent.setAction(Integer.toString(id));
+        return PendingIntent.getActivity(
+                context,
+                id,
+                startActivityIntent,
+                PendingIntent.FLAG_ONE_SHOT);
+    }
+
+    private static NotificationCompat.Action showTaskList(Context context, int id) {
+        Intent editTask = new Intent(context, MainActivity.class);
+        editTask.setAction(Integer.toString(id));
+        PendingIntent editTaskPendingIntent = PendingIntent.getActivity(
+                context,
+                id,
+                editTask,
+                PendingIntent.FLAG_ONE_SHOT);
+
+        NotificationCompat.Action showTasksAction = new NotificationCompat.Action(R.drawable.edit_task,
+                "Show task list",
+                editTaskPendingIntent);
+
+        return showTasksAction;
+    }
+
+    private static void cancelNotificationAlarm(Context context, int id){
+        Intent notificationIntent = new Intent(context, NotificationReceiver.class);
+        notificationIntent.setAction("" + id);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, id, notificationIntent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
+    }
+
+    private static Bitmap largeIcon(Context context) {
+        Resources res = context.getResources();
+
+        Bitmap largeIcon = BitmapFactory.decodeResource(res, R.drawable.notification);
+        return largeIcon;
     }
 }

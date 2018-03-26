@@ -2,8 +2,10 @@ package com.dziura.patryk.todolist;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -80,7 +82,7 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<CustomCursorAdapte
             holder.priorityImage.setVisibility(View.GONE);
         }
 
-        if (notification.equals("ON"))
+        if (notification.equals("ON") && datetime > System.currentTimeMillis())
             holder.notificationImage.setVisibility(View.VISIBLE);
         else
             holder.notificationImage.setVisibility(View.GONE);
