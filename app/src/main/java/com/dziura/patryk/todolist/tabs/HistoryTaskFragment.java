@@ -96,9 +96,6 @@ public class HistoryTaskFragment extends Fragment implements CustomCursorAdapter
             } else
                 Toast.makeText(mainActivityContext, "There is nothing to delete.", Toast.LENGTH_SHORT).show();
         });
-
-        //getActivity().getSupportLoaderManager().initLoader(TASK_LOADER_ID, null, this);
-
         return rootView;
     }
 

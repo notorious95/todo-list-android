@@ -69,9 +69,6 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<CustomCursorAdapte
         String notification = mCursor.getString(notificationId);
 
         String formattedDate = setTimeText(datetime);
-        //String formattedDate = "asd";
-        //SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-        //String formattedDate = sdf.format(datetime);
 
         holder.itemView.setTag(id);
         holder.taskDescriptionView.setText(description);
@@ -137,7 +134,6 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<CustomCursorAdapte
 
     private String setTimeText(long datetime) {
         SimpleDateFormat dayWeek = new SimpleDateFormat("EEEE");
-        //SimpleDateFormat dateAndTime = new SimpleDateFormat("dd.MM.yyyy HH:mm");
         SimpleDateFormat time = new SimpleDateFormat("HH:mm");
         SimpleDateFormat date = new SimpleDateFormat("dd.MM.yyyy");
         SimpleDateFormat dateYear = new SimpleDateFormat("yyyy");
@@ -147,7 +143,6 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<CustomCursorAdapte
         Date dateToday = null;
         Date dateDayAfterTommorow = null;
         Date dateYesterday = null;
-        //Date dateDayBeforeYesterday = null;
         Date dateAfterYear = null;
         Date dateCurrentYear = null;
 
@@ -156,9 +151,6 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<CustomCursorAdapte
         int month = c.get(Calendar.MONTH) + 1;
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        //day = day-2;
-        //String beforeYesterday = "" + day + "." + month + "." + year;
-        //day++;
         day--;
         String yesterday = "" + day + "." + month + "." + year;
         day++;
@@ -177,7 +169,6 @@ public class CustomCursorAdapter extends RecyclerView.Adapter<CustomCursorAdapte
             dateTommorow = date.parse(tommorow);
             dateToday = date.parse(today);
             dateYesterday = date.parse(yesterday);
-            //dateDayBeforeYesterday = date.parse(beforeYesterday);
             dateAfterYear = dateYear.parse(afterYear);
             dateCurrentYear = dateYear.parse(currentYear);
 

@@ -309,24 +309,24 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
     @Override
     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
         month++;
-//        mToday = false;
-//        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-//        try {
-//            int day = dayOfMonth + 1;
-//            Date pickedDate = sdf.parse("" + day + "/" + month + "/" + year);
-//            if (pickedDate.before(new Date())) {
-//                Toast.makeText(this, "You chose wrong date. Try again.", Toast.LENGTH_SHORT).show();
-//                return;
-//            }
-//
-//            pickedDate = sdf.parse("" + dayOfMonth + "/" + month + "/" + year);
-//            if (pickedDate.before(new Date())) {
-//                mToday = true;
-//            }
-//
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
+        mToday = false;
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            int day = dayOfMonth + 1;
+            Date pickedDate = sdf.parse("" + day + "/" + month + "/" + year);
+            if (pickedDate.before(new Date())) {
+                Toast.makeText(this, "You chose wrong date. Try again.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            pickedDate = sdf.parse("" + dayOfMonth + "/" + month + "/" + year);
+            if (pickedDate.before(new Date())) {
+                mToday = true;
+            }
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         if (month < 10)
             mDateTextView.setText("" + dayOfMonth + ".0" + month + "." + year);
         else
@@ -336,12 +336,12 @@ public class TaskActivity extends AppCompatActivity implements DatePickerDialog.
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-//        if (mToday && hourOfDay <= mCurrentHour){
-//            if ((hourOfDay == mCurrentHour && minute <= mCurrentMinute) || (hourOfDay < mCurrentHour)){
-//                Toast.makeText(this, "You chose wrong time. Try again.", Toast.LENGTH_SHORT).show();
-//                return;
-//            }
-//        }
+        if (mToday && hourOfDay <= mCurrentHour){
+            if ((hourOfDay == mCurrentHour && minute <= mCurrentMinute) || (hourOfDay < mCurrentHour)){
+                Toast.makeText(this, "You chose wrong time. Try again.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
         if (minute < 10)
             mTimeTextView.setText("" + hourOfDay + ":0" + minute);
         else

@@ -87,9 +87,6 @@ public class TodayTasksFragment extends Fragment implements CustomCursorAdapter.
             addNewTaskIntent.putExtra("theme", mSelectedTheme);
             startActivity(addNewTaskIntent);
         });
-
-        //getActivity().getSupportLoaderManager().initLoader(TASK_LOADER_ID, null, this);
-
         return rootView;
     }
 
